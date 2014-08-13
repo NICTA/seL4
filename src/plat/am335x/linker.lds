@@ -33,6 +33,8 @@ SECTIONS
     {
         /* Sit inside a large frame */
         . = ALIGN(64K);
+       text_start = .;
+
         *(.vectors)
 
         /* Fastpath code */
@@ -48,12 +50,15 @@ SECTIONS
         /* Standard kernel */
         *(.text)
     }
+    text_end = .;
 
     .rodata . : AT(ADDR(.rodata) - KERNEL_OFFSET)
     {
+        rodata_start = .;
         *(.rodata)
         *(.rodata.*)
     }
+    rodata_end = .;
 
     .data . : AT(ADDR(.data) - KERNEL_OFFSET)
     {

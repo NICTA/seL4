@@ -25,6 +25,10 @@
 #include <arch/machine/capdl.h>
 #endif
 
+#ifdef SELF_TEST
+#include <selftest/checksum.h>
+#endif
+
 /* The haskell function 'handleEvent' is split into 'handleXXX' variants
  * for each event causing a kernel entry */
 
@@ -69,6 +73,45 @@ handleUnknownSyscall(word_t w)
         lookupCapAndSlot_ret_t lu_ret = lookupCapAndSlot(ksCurThread, cptr);
         uint32_t cap_type = cap_get_capType(lu_ret.cap);
         setRegister(ksCurThread, capRegister, cap_type);
+        return EXCEPTION_NONE;
+    }
+#endif
+
+#ifdef SELF_TEST
+    if (w == SysDebugSelfTest) {
+	word_t cptr = getRegister(ksCurThread, capRegister);
+        lookupCap_ret_t lu_ret = lookupCap(ksCurThread, cptr);
+        if (cap_get_capType(lu_ret.cap) != cap_self_test_cap) {
+            setRegister(ksCurThread, capRegister, EXCEPTION_SYSCALL_ERROR);
+            return EXCEPTION_SYSCALL_ERROR;
+        }
+        printf("Debug self-test syscall from user thread 0x%x\n", (unsigned int)ksCurThread);
+        if (selftestKernelChecksum()) {
+            setRegister(ksCurThread, capRegister, 0);
+        } else {
+            setRegister(ksCurThread, capRegister, -1);
+        }
+        return EXCEPTION_NONE;
+    }
+
+    if (w == SysDebugChecksum) {
+        word_t cptr = getRegister(ksCurThread, capRegister);
+        lookupCap_ret_t lu_ret = lookupCap(ksCurThread, cptr);
+        word_t checksum;
+        if (cap_get_capType(lu_ret.cap) != cap_self_test_cap) {
+            setRegister(ksCurThread, capRegister, EXCEPTION_SYSCALL_ERROR);
+            return EXCEPTION_SYSCALL_ERROR;
+        }
+
+        cptr = getRegister(ksCurThread, msgInfoRegister);
+        lu_ret = lookupCap(ksCurThread, cptr);
+        if (lu_ret.status != EXCEPTION_NONE) {
+            setRegister(ksCurThread, capRegister, lu_ret.status);
+            return lu_ret.status;
+        }
+        checksum = selftestChecksum(lu_ret.cap);
+        setRegister(ksCurThread, msgInfoRegister, checksum);
+        setRegister(ksCurThread, capRegister, 0);
         return EXCEPTION_NONE;
     }
 #endif

@@ -507,6 +507,35 @@ seL4_DebugCapIdentify(seL4_CPtr cap)
 }
 #endif
 
+#ifdef SEL4_SELF_TEST
+static inline unsigned
+seL4_DebugSelfTest(seL4_CPtr selftest_cap)
+{
+    register seL4_Word arg1 asm("r0") = selftest_cap;
+    register seL4_Word scno asm("r7") = seL4_SysDebugSelfTest;
+    asm volatile ("swi %[swi_num]"
+                  : "+r"(arg1) /* error code */
+                  : [swi_num] "i" __SWINUM(seL4_SysDebugSelfTest), "r"(scno));
+    return arg1;
+}
+
+static inline unsigned
+seL4_DebugChecksum(seL4_CPtr selftest_cap, seL4_CPtr cap, uint32_t *crc)
+{
+    register seL4_Word arg1 asm("r0") = selftest_cap;
+    register seL4_Word arg2 asm("r1") = cap;
+    register seL4_Word scno asm("r7") = seL4_SysDebugChecksum;
+    asm volatile ("swi %[swi_num]"
+                  : "+r"(arg1), /* error code */
+		    "+r"(arg2)  /* CRC */
+                  : [swi_num] "i" __SWINUM(seL4_SysDebugChecksum), "r"(scno));
+    if (!arg1) {
+	*crc = arg2;
+    }
+    return arg1;
+}
+#endif
+
 #ifdef SEL4_DANGEROUS_CODE_INJECTION_KERNEL
 static inline void
 seL4_DebugRun(void (* userfn) (void *), void* userarg)

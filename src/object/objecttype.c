@@ -128,6 +128,7 @@ finaliseCap(cap_t cap, bool_t final, bool_t exposed)
     case cap_reply_cap:
     case cap_null_cap:
     case cap_domain_cap:
+    case cap_self_test_cap:
         fc_ret.remainder = cap_null_cap_new();
         fc_ret.irq = irqInvalid;
         return fc_ret;
@@ -453,6 +454,7 @@ maskCapRights(cap_rights_t cap_rights, cap_t cap)
     case cap_irq_handler_cap:
     case cap_zombie_cap:
     case cap_thread_cap:
+    case cap_self_test_cap:
         return cap;
 
     case cap_endpoint_cap: {
@@ -594,6 +596,12 @@ decodeInvocation(word_t label, unsigned int length,
 
     case cap_zombie_cap:
         userError("Attempted to invoke a zombie cap #%u.", capIndex);
+        current_syscall_error.type = seL4_InvalidCapability;
+        current_syscall_error.invalidCapNumber = 0;
+        return EXCEPTION_SYSCALL_ERROR;
+
+    case cap_self_test_cap:
+        userError("Attempted to invoke a self-test cap #%d.", (int)capIndex);
         current_syscall_error.type = seL4_InvalidCapability;
         current_syscall_error.invalidCapNumber = 0;
         return EXCEPTION_SYSCALL_ERROR;

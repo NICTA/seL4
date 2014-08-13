@@ -13,6 +13,7 @@ include ${SOURCE_ROOT}/src/kernel/Makefile
 include ${SOURCE_ROOT}/src/object/Makefile
 include ${SOURCE_ROOT}/src/model/Makefile
 include ${SOURCE_ROOT}/src/machine/Makefile
+include ${SOURCE_ROOT}/src/selftest/Makefile
 
 C_SOURCES += src/inlines.c \
              src/assert.c \

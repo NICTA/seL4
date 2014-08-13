@@ -30,6 +30,10 @@
             <syscall name="DebugCapIdentify"   />
             <syscall name="DebugSnapshot" />
         </config>
+	<config name="SEL4_SELF_TEST">
+            <syscall name="DebugSelfTest" />
+            <syscall name="DebugChecksum" />
+	</config>
         <config name="DANGEROUS_CODE_INJECTION">
             <syscall name="DebugRun"/>
         </config>

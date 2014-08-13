@@ -48,14 +48,18 @@ SECTIONS
 
     .text . : AT(ADDR(.text) - BASE_OFFSET)
     {
+        text_start = .;
         *(.text)
     }
+    text_end = .;
 
     .rodata . : AT(ADDR(.rodata) - BASE_OFFSET)
     {
+        rodata_start = .;
         *(.rodata)
         *(.rodata.*)
     }
+    rodata_end = .;
 
     .glob . : AT(ADDR(.glob) - BASE_OFFSET)
     {

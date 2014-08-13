@@ -501,6 +501,32 @@ seL4_DebugCapIdentify(seL4_CPtr cap)
 }
 #endif
 
+#ifdef SEL4_SELF_TEST
+static inline uint32_t
+seL4_DebugSelfTest(seL4_CPtr selftest_cap)
+{
+    asm volatile (
+        "pushl %%ebp       \n"
+        "movl %%esp, %%ecx \n"
+        "leal 1f, %%edx    \n"
+        "1:                \n"
+        "sysenter          \n"
+        "popl %%ebp        \n"
+        : "=b"(cap)
+        : "a"(seL4_SysDebugSelfTest), "b"(selftest_cap)
+        : "%ecx", "%edx", "%esi", "%edi", "memory"
+    );
+    return (uint32_t)cap;
+}
+
+/* TODO:
+static inline uint32_t
+seL4_DebugSelfTest(seL4_CPtr selftest_cap)
+{
+}
+*/
+#endif
+
 #if defined(SEL4_DANGEROUS_CODE_INJECTION_KERNEL)
 static inline void
 seL4_DebugRun(void (*userfn) (void *), void* userarg)

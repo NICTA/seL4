@@ -135,6 +135,7 @@ $(info TOOLPREFIX    = ${TOOLPREFIX})
 $(info PATH          = ${PATH})
 $(info DEBUG         = ${DEBUG})
 $(info ASSERT        = ${ASSERT})
+$(info SELF_TEST     = ${SELF_TEST})
 $(info CONFIG_DEFS   = ${CONFIG_DEFS})
 $(info DANGEROUS_CODE_INJECTION = ${DANGEROUS_CODE_INJECTION})
 endif
@@ -247,6 +248,8 @@ CPP = ${TOOLPREFIX}cpp
 AS = ${TOOLPREFIX}as
 LD = ${TOOLPREFIX}ld
 STRIP = ${TOOLPREFIX}strip
+OBJCOPY = ${TOOLPREFIX}objcopy
+READELF = ${TOOLPREFIX}readelf
 BF_GEN = bitfield_gen.py
 CHANGED = ${SOURCE_ROOT}/tools/changed.sh
 CPP_GEN = ${SOURCE_ROOT}/tools/cpp_gen.sh
@@ -337,6 +340,11 @@ endif
 ifdef FASTPATH
 DEFINES += -DFASTPATH
 endif
+
+ifdef SELF_TEST
+DEFINES += -DSELF_TEST
+endif
+
 
 # Only set CFLAGS if we're building standalone.
 # common/Makefile.Flags sets NK_CFLAGS  in Kbuild environments.
@@ -478,10 +486,24 @@ kernel_final.c: kernel_all.c_pp
 
 LINKER_SCRIPT = src/plat/${PLAT}/linker.lds
 
+# TODO: avoid duplicating the ld step
+ifdef SELF_TEST
+kernel.elf: ${OBJECTS} ${LINKER_SCRIPT}
+	@echo " [LD] $@.nocrc"
+	$(Q)${LD} ${LDFLAGS} -T ${SOURCE_ROOT}/${LINKER_SCRIPT} \
+		-o $@.nocrc ${OBJECTS}
+	# embed checksum
+	@echo " [CRC32.text] $@";
+	$(Q)${SOURCE_ROOT}/tools/crc32_embed.sh $@.nocrc .text
+	@echo " [CRC32.rodata] $@";
+	$(Q)${SOURCE_ROOT}/tools/crc32_embed.sh $@.nocrc .rodata
+	$(Q)${CHANGED} $@ mv $@.nocrc $@
+else
 kernel.elf: ${OBJECTS} ${LINKER_SCRIPT}
 	@echo " [LD] $@"
 	$(Q)${CHANGED} $@ ${LD} ${LDFLAGS} -T ${SOURCE_ROOT}/${LINKER_SCRIPT} \
 		-o $@ ${OBJECTS}
+endif
 
 ############################################################
 ### Pattern rules

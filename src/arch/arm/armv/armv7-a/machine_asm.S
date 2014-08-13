@@ -24,10 +24,10 @@ END_FUNC(lockTLBEntry)
 #else /* !ARM_CORTEX_A15 */
 
 /* lockTLBEntry should lie within a single page so that spurious TLB walks do
- * not interfere. Aligning to a 64-byte instruction boundary will suffice, as
- * the function critical section of the function fits within 64 bytes.
+ * not interfere. Aligning to a 128-byte instruction boundary will suffice, as
+ * the function critical section of the function fits within 128 bytes.
  */
-    .balign (16*4)
+    .balign (128)
 BEGIN_FUNC(lockTLBEntry)
     /* Lock this entry into the next position.
      * On Cortex-A8, the first N TLB entries can be locked,
@@ -35,7 +35,8 @@ BEGIN_FUNC(lockTLBEntry)
      *
      * Find out how many entries are already locked.
      */
-    ldr r3, tlb_lock_count
+    ldr ip, =tlb_lock_count
+    ldr r3, [ip]
 
     /* Set up the values we need to program into the lockdown register. */
 #if defined(ARM_CORTEX_A8)
@@ -63,7 +64,7 @@ BEGIN_FUNC(lockTLBEntry)
 #   error Undefined CPU for TLB lockdown
 #endif
 
-    str r3, tlb_lock_count
+    str r3, [ip]
 
     /* Invalidate both I & D TLB entry */
     mcr p15, 0, r0, c8, c7, 1
@@ -77,11 +78,15 @@ BEGIN_FUNC(lockTLBEntry)
     mcr p15, 0, r0, c10, c1, 0 /* Load D-TLB entry. */
     mcr p15, 0, r2, c10, c0, 0 /* Finish locking walked D-TLB entries. */
 
-    /* 64-byte boundary is here (phew!) <------------------------ */
+    /* 68 out of 128 bytes used at this point <------------------------ */
 
     bx lr
 
+END_FUNC(lockTLBEntry)
+
+/* This is used to store a variable, so put it in .data */
+.pushsection .data, "aw"
 tlb_lock_count:
     .word 0
-END_FUNC(lockTLBEntry)
+.popsection
 #endif /* ARM_CORTEX_A15 */

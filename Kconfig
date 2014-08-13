@@ -218,7 +218,13 @@ menu "seL4 System Parameters"
         help
             Enable IPC fastpath
 
-      config NUM_DOMAINS
+    config SELF_TEST
+        bool "Enable kernel self-tests"
+        default y
+        help
+            Enable kernel self-test system call.
+
+    config NUM_DOMAINS
         int "Number of domains"
         default 1
         help

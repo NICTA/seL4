@@ -202,6 +202,12 @@ create_domain_cap(cap_t root_cnode_cap)
     write_slot(SLOT_PTR(pptr_of_cap(root_cnode_cap), BI_CAP_DOM), cap);
 }
 
+BOOT_CODE void
+create_self_test_cap(cap_t root_cnode_cap)
+{
+    write_slot(SLOT_PTR(pptr_of_cap(root_cnode_cap), BI_CAP_SELF_TEST), cap_self_test_cap_new());
+}
+
 
 BOOT_CODE cap_t
 create_ipcbuf_frame(cap_t root_cnode_cap, cap_t pd_cap, vptr_t vptr)

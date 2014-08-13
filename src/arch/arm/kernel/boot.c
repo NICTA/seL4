@@ -379,6 +379,9 @@ try_init_kernel(
     /* create the cap for managing thread domains */
     create_domain_cap(root_cnode_cap);
 
+    /* Create kernel self-test cap */
+    create_self_test_cap(root_cnode_cap);
+
     /* create the IRQ CNode */
     if (!create_irq_cnode()) {
         return false;
