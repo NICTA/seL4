@@ -127,7 +127,7 @@ fastpath_call(word_t cptr, word_t msgInfo)
 
 #if CONFIG_MAX_NUM_NODES > 1
     /* Ensure both threads have the same affinity */
-    if (unlikely(NODE_STATE(ksCurThread)->tcbAffinity != dest->tcbAffinity)) {
+    if (unlikely(NODE_STATE(ksCurThread)->tcbSchedContext->scCore != dest->tcbSchedContext->scCore)) {
         slowpath(SysCall);
     }
 #endif
@@ -305,7 +305,7 @@ fastpath_reply_recv(word_t cptr, word_t msgInfo)
 
 #if CONFIG_MAX_NUM_NODES > 1
     /* Ensure both threads have the same affinity */
-    if (unlikely(NODE_STATE(ksCurThread)->tcbAffinity != caller->tcbAffinity)) {
+    if (unlikely(NODE_STATE(ksCurThread)->tcbSchedContext->scCore != caller->tcbSchedContext->scCore)) {
         slowpath(SysReplyRecv);
     }
 #endif
