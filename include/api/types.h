@@ -25,6 +25,7 @@
 
 typedef word_t prio_t;
 typedef uint64_t ticks_t;
+typedef uint64_t time_t;
 
 enum domainConstants {
     minDom = 0,
