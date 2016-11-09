@@ -40,6 +40,7 @@
 #define seL4_HugePageBits       30
 #define seL4_ASIDPoolBits       12
 #define seL4_SchedContextBits    8
+#define seL4_ReplyBits           5
 
 #define seL4_X86_VCPUBits    14
 #define seL4_X86_EPTPML4Bits 12

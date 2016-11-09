@@ -33,6 +33,8 @@ enum _register {
     msgInfoRegister = 4,
     /* 0x14 */  EDI             = 5,
     /* 0x18 */  EBP             = 6,
+    replyRegister               = 6,
+    n_generalRegisters          = 7,
 
     /* segment registers */
 
@@ -61,7 +63,7 @@ enum _register {
 typedef word_t register_t;
 
 enum messageSizes {
-    n_msgRegisters = 2,
+    n_msgRegisters = 1,
     n_frameRegisters = 10,
     n_gpRegisters = 3,
     n_exceptionMessage = 3,
