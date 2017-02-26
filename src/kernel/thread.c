@@ -526,7 +526,7 @@ postpone(sched_context_t *sc)
 {
     tcbSchedDequeue(sc->scTcb);
     tcbReleaseEnqueue(sc->scTcb);
-    NODE_STATE(ksReprogram) = true;
+    NODE_STATE_ON_CORE(ksReprogram, sc->scCore) = true;
 }
 
 void
